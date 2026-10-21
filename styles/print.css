@@ -1,0 +1,103 @@
+/* ============================================================================
+   PRINT / PDF LAYER — A4 PRINTING PRESS
+   ========================================================================== */
+
+@page {
+  size: A4 portrait;
+  margin: 13mm 12mm 15mm;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .app-root {
+    display: block !important;
+    height: auto !important;
+    background: #fff !important;
+  }
+
+  .topbar,
+  .statusbar,
+  .view:not(#view-report),
+  .report-toolbar,
+  .no-print {
+    display: none !important;
+  }
+
+  .view-host,
+  .view,
+  #view-report,
+  .report-host {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    inset: auto !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  .report-doc {
+    max-width: none !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    display: block !important;
+  }
+
+  .report-page {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .report-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .report-page::after {
+    position: fixed;
+    right: 0;
+    bottom: -8mm;
+  }
+
+  .rp-sec,
+  .rp-chart,
+  .eq-block,
+  .stat-strip,
+  .rp-diag {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .data-sheet {
+    font-size: 9.5px !important;
+  }
+
+  .data-sheet thead th {
+    position: static !important;
+  }
+
+  .rp-chart canvas,
+  .rp-schematic {
+    max-height: 150mm;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

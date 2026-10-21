@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="PENDULUM//LAB — Brutalist Physics Engine & Data Studio: simulare, măsurare computer-vision, regresie T²=f(L), raport A4. Static, zero-build."
+    />
+    <title>PENDULUM//LAB — Motor de fizică &amp; studio de date</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/app.css" />
+    <link rel="stylesheet" href="styles/print.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cline x1='16' y1='4' x2='24' y2='24' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='24' cy='24' r='5' fill='%23FF3B30'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <div class="app-root" id="app-root">
+      <!-- ================================================== TOP BAR ==== -->
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand__mark" aria-hidden="true"></div>
+          <div>
+            <div class="brand__name">Pendulum<span>//</span>Lab</div>
+            <span class="brand__sub">Motor de fizică &amp; studio de date</span>
+          </div>
+        </div>
+
+        <nav class="tabbar" id="tabbar" aria-label="Module">
+          <button class="tab is-active" data-view="sim" type="button">
+            <span class="tab__idx">01</span>Simulare
+          </button>
+          <button class="tab" data-view="compare" type="button">
+            <span class="tab__idx">02</span>Izolare
+          </button>
+          <button class="tab" data-view="lab" type="button">
+            <span class="tab__idx">03</span>Lab-Cam
+          </button>
+          <button class="tab" data-view="batch" type="button">
+            <span class="tab__idx">04</span>Batch-200
+          </button>
+          <button class="tab" data-view="data" type="button">
+            <span class="tab__idx">05</span>Date
+          </button>
+          <button class="tab" data-view="report" type="button">
+            <span class="tab__idx">06</span>Raport
+          </button>
+        </nav>
+
+        <div class="topbar__meta">
+          <span>Sesiune&nbsp;<b id="meta-session">—</b></span>
+          <span>UTC&nbsp;<b id="meta-utc">00:00:00</b></span>
+        </div>
+      </header>
+
+      <!-- =================================================== VIEWS ==== -->
+      <main class="view-host" id="view-host">
+        <!-- ---------------------------------------------------- 01 SIM -->
+        <section class="view is-active" id="view-sim" data-view="sim">
+          <div class="split split--sim">
+            <aside class="rail">
+              <div class="module">
+                <div class="module__head">Tipul sistemului</div>
+                <div class="module__body">
+                  <div class="seg" id="sim-type-seg">
+                    <button type="button" data-type="simple" class="is-active">Simplu</button>
+                    <button type="button" data-type="physical">Fizic</button>
+                    <button type="button" data-type="double">Dublu</button>
+                    <button type="button" data-type="inverted">Inversat</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="module">
+                <div class="module__head">Geometrie &amp; masă</div>
+                <div class="module__body">
+                  <div class="field">
+                    <label class="field__label" for="sim-L">Lungime L<small>pivot → bilă</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-L" value="1" min="0.02" max="20" step="0.01" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sim-m">Masă m<small>masa bilei</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-m" value="1" min="0.01" max="500" step="0.01" />
+                      <span class="unit">kg</span>
+                    </div>
+                  </div>
+                  <div class="field is-hidden-double">
+                    <label class="field__label" for="sim-L2">Lungime L₂<small>dublu — al 2-lea băț</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-L2" value="0.6" min="0.02" max="20" step="0.01" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                  <div class="field is-hidden-double">
+                    <label class="field__label" for="sim-m2">Masă m₂<small>dublu — a 2-a bilă</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-m2" value="1" min="0.01" max="500" step="0.01" />
+                      <span class="unit">kg</span>
+                    </div>
+                  </div>
+                  <div class="field is-hidden-physical">
+                    <label class="field__label" for="sim-inertia">Corp<small>fizic — geometrie</small></label>
+                    <div class="field__ctl">
+                      <select id="sim-inertia">
+                        <option value="point">MASĂ PUNCTUALĂ</option>
+                        <option value="rod_end" selected>BĂȚ / PIVOT LA CAPĂT</option>
+                        <option value="disk_rim">DISC / PIVOT LA MARGINE</option>
+                        <option value="hoop_rim">INEL / PIVOT LA MARGINE</option>
+                        <option value="custom">k PERSONALIZAT</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field is-hidden-physical">
+                    <label class="field__label" for="sim-radius">Rază R<small>disc / inel</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-radius" value="0.5" min="0.01" max="10" step="0.01" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                  <div class="field is-hidden-physical">
+                    <label class="field__label" for="sim-kg">Rază de girație k<small>I = m·k²</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-kg" value="0.5" min="0.01" max="10" step="0.01" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="module">
+                <div class="module__head">Câmp &amp; starea inițială</div>
+                <div class="module__body">
+                  <div class="field">
+                    <label class="field__label" for="sim-g">Gravitație g</label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-g" value="9.80665" min="0.1" max="30" step="0.00001" />
+                      <span class="unit">m/s²</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sim-theta0">Unghi θ₀<small>față de echilibru</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-theta0" value="0.35" min="0.001" max="3.14" step="0.01" />
+                      <span class="unit">rad</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sim-omega0">Viteză ω₀</label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-omega0" value="0" min="-20" max="20" step="0.01" />
+                      <span class="unit">rad/s</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sim-damping">Amortizare c<small>termen vâscos</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-damping" value="0" min="0" max="5" step="0.001" />
+                      <span class="unit">1/s</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="module">
+                <div class="module__head">Antrenare &amp; control</div>
+                <div class="module__body">
+                  <div class="field">
+                    <label class="field__label" for="sim-driveA">Antrenare A<small>amplitudinea cuplului</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-driveA" value="0" min="-50" max="50" step="0.01" />
+                      <span class="unit">rad/s²</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sim-driveW">Antrenare Ω<small>frecvența cuplului</small></label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-driveW" value="2" min="0" max="50" step="0.01" />
+                      <span class="unit">rad/s</span>
+                    </div>
+                  </div>
+                  <label class="chk is-hidden-inverted">
+                    <input type="checkbox" id="sim-control" />
+                    Stabilizare PD (inversat)
+                  </label>
+                  <div class="field is-hidden-inverted">
+                    <label class="field__label" for="sim-kp">Câștig Kp</label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-kp" value="24" min="0" max="500" step="1" />
+                    </div>
+                  </div>
+                  <div class="field is-hidden-inverted">
+                    <label class="field__label" for="sim-kd">Câștig Kd</label>
+                    <div class="field__ctl">
+                      <input type="number" id="sim-kd" value="6" min="0" max="100" step="0.1" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="module">
+                <div class="module__head">Câmp de desen</div>
+                <div class="module__body">
+                  <label class="chk"><input type="checkbox" id="opt-vectors" checked /> Vectori de forță</label>
+                  <label class="chk"><input type="checkbox" id="opt-trail" checked /> Urma punctată</label>
+                  <label class="chk"><input type="checkbox" id="opt-grid" checked /> Grilă milimetrică</label>
+                  <label class="chk"><input type="checkbox" id="opt-dims" checked /> Linii de cotă</label>
+                  <label class="chk"><input type="checkbox" id="opt-hatch" checked /> Hașura de tensiune</label>
+                  <div class="field">
+                    <label class="field__label" for="opt-density">Densitatea urmei</label>
+                    <div class="field__ctl"><input type="range" class="range" id="opt-density" min="1" max="10" step="1" value="6" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="opt-timescale">Scara de timp</label>
+                    <div class="field__ctl"><input type="range" class="range" id="opt-timescale" min="0.1" max="2" step="0.05" value="1" /></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="module">
+                <div class="module__head">Comenzi</div>
+                <div class="module__body stack-sm">
+                  <button type="button" class="btn btn--ink btn--lg btn--block" id="sim-run">▶ Rulează</button>
+                  <div class="btn-row">
+                    <button type="button" class="btn" id="sim-step">Pas +10ms</button>
+                    <button type="button" class="btn" id="sim-reset">Resetează</button>
+                  </div>
+                  <button type="button" class="btn btn--block" id="sim-random">θ₀ aleatoriu</button>
+                  <button type="button" class="btn btn--block btn--signal" id="sim-log">
+                    → Trimite T în Date
+                  </button>
+                </div>
+              </div>
+            </aside>
+
+            <div class="stage" id="sim-stage">
+              <canvas id="sim-canvas"></canvas>
+            </div>
+
+            <aside class="rail rail--right">
+              <div class="readout">
+                <div class="readout__k">Timp t</div>
+                <div class="readout__v" id="ro-t">0.000<small>s</small></div>
+              </div>
+              <div class="readout">
+                <div class="readout__k">Unghi θ</div>
+                <div class="readout__v" id="ro-theta">0.000<small>rad</small></div>
+              </div>
+              <div class="readout">
+                <div class="readout__k">Viteză unghiulară ω</div>
+                <div class="readout__v" id="ro-omega">0.000<small>rad/s</small></div>
+              </div>
+              <div class="readout readout--signal">
+                <div class="readout__k">Tensiunea bățului |T|</div>
+                <div class="readout__v" id="ro-tension">0.00<small>N</small></div>
+              </div>
+              <div class="readout">
+                <div class="readout__k">Energie mecanică E</div>
+                <div class="readout__v" id="ro-energy">0.000<small>J</small></div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Perioadă — mic unghi T₀</div>
+                <div class="readout__v" id="ro-t0">2.006<small>s</small></div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Perioadă — Borda T(θ₀)</div>
+                <div class="readout__v" id="ro-tb">2.006<small>s</small></div>
+              </div>
+              <div class="readout readout--sm readout--signal">
+                <div class="readout__k">Perioadă — măsurată</div>
+                <div class="readout__v" id="ro-tm">——</div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Deviație ΔT = T − T<sub>Borda</sub></div>
+                <div class="readout__v" id="ro-dtm">——</div>
+              </div>
+              <div class="module">
+                <div class="module__head">Portret de fază θ / ω</div>
+                <div class="module__body" style="padding: 0">
+                  <canvas id="sim-phase" style="width: 100%; height: 180px; display: block"></canvas>
+                </div>
+              </div>
+              <div class="module">
+                <div class="module__head">Raportul sistemului</div>
+                <div class="module__body">
+                  <table class="kv-table" id="sim-kv">
+                    <tbody>
+                      <tr><td>Tip</td><td id="kv-type">SIMPLE</td></tr>
+                      <tr><td>Leff</td><td id="kv-leff">1.000 m</td></tr>
+                      <tr><td>ω₀ = √(g/L)</td><td id="kv-wn">3.131 rad/s</td></tr>
+                      <tr><td>ξ = c/2ωₙ</td><td id="kv-xi">0.000</td></tr>
+                      <tr><td>Regim</td><td id="kv-regime">NEAMORTIZAT</td></tr>
+                      <tr><td>Amplitudine</td><td id="kv-amp">0.350 rad</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ------------------------------------------------- 02 COMPARE -->
+        <section class="view" id="view-compare" data-view="compare">
+          <div class="split split--sim">
+            <aside class="rail">
+              <div class="module">
+                <div class="module__head">Protocol de izolare</div>
+                <div class="module__body stack-sm">
+                  <div class="field">
+                    <label class="field__label" for="cmp-factor">Factorul testat</label>
+                    <div class="field__ctl">
+                      <select id="cmp-factor" class="wide">
+                        <option value="mass">MASA m</option>
+                        <option value="length">LUNGIME L</option>
+                        <option value="amplitude">AMPLITUDINE θ₀</option>
+                        <option value="damping">AMORTIZARE c</option>
+                        <option value="gravity">GRAVITAȚIE g</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-base-L">L de bază</label>
+                    <div class="field__ctl">
+                      <input type="number" id="cmp-base-L" value="1" min="0.02" max="20" step="0.01" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-base-m">m de bază</label>
+                    <div class="field__ctl">
+                      <input type="number" id="cmp-base-m" value="1" min="0.01" max="500" step="0.01" />
+                      <span class="unit">kg</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-base-th">θ₀ de bază</label>
+                    <div class="field__ctl">
+                      <input type="number" id="cmp-base-th" value="0.3" min="0.001" max="3.1" step="0.01" />
+                      <span class="unit">rad</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-v1">Nivelul 1</label>
+                    <div class="field__ctl"><input type="number" id="cmp-v1" value="0.5" step="0.01" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-v2">Nivelul 2</label>
+                    <div class="field__ctl"><input type="number" id="cmp-v2" value="1" step="0.01" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-v3">Nivelul 3</label>
+                    <div class="field__ctl"><input type="number" id="cmp-v3" value="5" step="0.01" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cmp-v4">Nivelul 4</label>
+                    <div class="field__ctl"><input type="number" id="cmp-v4" value="20" step="0.01" /></div>
+                  </div>
+                  <button type="button" class="btn btn--ink btn--lg btn--block" id="cmp-run">▶ Rulează comparația</button>
+                  <button type="button" class="btn btn--block" id="cmp-to-data">Trimite verdictul ΔT → Date</button>
+                </div>
+              </div>
+              <div class="module">
+                <div class="module__head">Ipoteză</div>
+                <div class="module__body">
+                  <div class="note" id="cmp-hypothesis">
+                    Clasicul test de izocronism: T = 2π√(L/g) nu conține niciun termen de
+                    masă. Cele patru cuadrante rulează aceeași geometrie cu m diferite.
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <div class="stage" id="cmp-stage">
+              <canvas id="cmp-canvas"></canvas>
+              <div class="verdict hidden" id="cmp-verdict">
+                <div class="verdict__k">Deviația maximă a perioadei</div>
+                <div class="verdict__v" id="cmp-verdict-v">ΔT = ——</div>
+                <div class="verdict__sub" id="cmp-verdict-sub">—</div>
+              </div>
+            </div>
+
+            <aside class="rail rail--right">
+              <div class="readout readout--sm">
+                <div class="readout__k">Cuadrant A · T</div>
+                <div class="readout__v" id="cmp-ta">——</div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Cuadrant B · T</div>
+                <div class="readout__v" id="cmp-tb">——</div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Cuadrant C · T</div>
+                <div class="readout__v" id="cmp-tc">——</div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Cuadrant D · T</div>
+                <div class="readout__v" id="cmp-td">——</div>
+              </div>
+              <div class="readout readout--signal">
+                <div class="verdict__k" style="opacity: 0.6">Împrăștiere max−min</div>
+                <div class="readout__v" id="cmp-spread">——</div>
+              </div>
+              <div class="module">
+                <div class="module__head">Matrice</div>
+                <div class="module__body" style="padding: 0; overflow-x: auto">
+                  <table class="data-sheet" id="cmp-table">
+                    <thead>
+                      <tr><th>Q</th><th>Factor</th><th>T [s]</th><th>T₀ [s]</th><th>ΔT [s]</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------- 03 LAB -->
+        <section class="view" id="view-lab" data-view="lab">
+          <div class="split split--lab">
+            <div class="lab-main">
+              <div class="cam-frame" id="cam-frame">
+                <video id="cam-video" playsinline muted></video>
+                <canvas id="cam-overlay"></canvas>
+                <div class="cam-placeholder" id="cam-placeholder">
+                  <b>MĂSURARE<br />FIZICĂ</b>
+                  <span>Urmărește cu camera o bilă de pendul reală.<br />Calibrează pivotul + culoarea → perioadă live, zero prelucrare.</span>
+                  <div class="btn-row">
+                    <button type="button" class="btn" id="cam-start">◉ Activează camera</button>
+                    <button type="button" class="btn" id="cam-file-btn">▣ Deschide fișier video</button>
+                  </div>
+                  <input type="file" id="cam-file" accept="video/*,image/*" class="hidden" />
+                </div>
+              </div>
+
+              <div class="lab-bar">
+                <div class="seg" id="cam-mode-seg">
+                  <button type="button" data-mode="color" class="is-active">Culoare</button>
+                  <button type="button" data-mode="luma">Lumină</button>
+                  <button type="button" data-mode="motion">Mișcare</button>
+                  <button type="button" data-mode="invert">Lumină⁻¹</button>
+                </div>
+                <button type="button" class="btn" id="cam-pivot-btn">✛ Setează pivotul</button>
+                <button type="button" class="btn" id="cam-bob-btn">◉ Calibrează bila</button>
+                <button type="button" class="btn" id="cam-toggle">⏸ Pauză</button>
+                <button type="button" class="btn" id="cam-stop">■ Stop</button>
+                <div class="spacer"></div>
+                <span class="track-state" id="cam-state">Oprit</span>
+              </div>
+            </div>
+
+            <aside class="rail rail--right">
+              <div class="module">
+                <div class="module__head">Reglarea urmăririi</div>
+                <div class="module__body">
+                  <div class="field">
+                    <label class="field__label" for="cam-tol">Toleranță culoare</label>
+                    <div class="field__ctl"><input type="range" class="range" id="cam-tol" min="20" max="200" step="1" value="78" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cam-luma">Prag lumină</label>
+                    <div class="field__ctl"><input type="range" class="range" id="cam-luma" min="20" max="250" step="1" value="165" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cam-motion">Prag mișcare</label>
+                    <div class="field__ctl"><input type="range" class="range" id="cam-motion" min="5" max="120" step="1" value="30" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cam-window">Fereastră de căutare</label>
+                    <div class="field__ctl"><input type="range" class="range" id="cam-window" min="40" max="400" step="5" value="110" /></div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="cam-smooth">Netezire</label>
+                    <div class="field__ctl"><input type="range" class="range" id="cam-smooth" min="10" max="100" step="1" value="50" /></div>
+                  </div>
+                  <label class="chk"><input type="checkbox" id="cam-bottom-pivot" /> Pivot jos (inversat)</label>
+                </div>
+              </div>
+
+              <div class="readout readout--signal">
+                <div class="readout__k">Unghi live θ</div>
+                <div class="readout__v" id="lab-theta">——<small>rad</small></div>
+              </div>
+              <div class="readout">
+                <div class="readout__k">Perioadă live T</div>
+                <div class="readout__v" id="lab-T">——<small>s</small></div>
+              </div>
+              <div class="readout">
+                <div class="readout__k">ΔT = T − T<sub>Borda</sub>(L, θ₀)</div>
+                <div class="readout__v" id="lab-dT">——<small>s</small></div>
+              </div>
+              <div class="readout readout--sm">
+                <div class="readout__k">Cicluri capturate</div>
+                <div class="readout__v" id="lab-cycles">0</div>
+              </div>
+              <div class="module">
+                <div class="module__head">Banda θ(t)</div>
+                <div class="module__body" style="padding: 0">
+                  <canvas id="lab-strip" style="width: 100%; height: 140px; display: block"></canvas>
+                </div>
+              </div>
+              <div class="module">
+                <div class="module__head module__head--signal">Înregistrare măsurare</div>
+                <div class="module__body stack-sm">
+                  <div class="field">
+                    <label class="field__label" for="lab-L">Lungime L (riglă)</label>
+                    <div class="field__ctl">
+                      <input type="number" id="lab-L" value="1" min="0.01" max="20" step="0.001" />
+                      <span class="unit">m</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="lab-m">Masă m</label>
+                    <div class="field__ctl">
+                      <input type="number" id="lab-m" value="0.05" min="0.001" max="500" step="0.001" />
+                      <span class="unit">kg</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="lab-th0">θ₀ măsurat</label>
+                    <div class="field__ctl">
+                      <input type="number" id="lab-th0" value="0.2" min="0.001" max="3.14" step="0.01" />
+                      <span class="unit">rad</span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn--signal btn--lg btn--block" id="lab-log">
+                    ⎘ Înregistrează T → Foaie
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ---------------------------------------------------- 04 BATCH -->
+        <section class="view" id="view-batch" data-view="batch">
+          <div class="split split--sim">
+            <aside class="rail">
+              <div class="module">
+                <div class="module__head">Protocoale presetate</div>
+                <div class="module__body stack-sm" id="protocol-list"></div>
+              </div>
+              <div class="module">
+                <div class="module__head">Configurare variație</div>
+                <div class="module__body">
+                  <div class="field">
+                    <label class="field__label" for="sw-type">Pendul</label>
+                    <div class="field__ctl">
+                      <select id="sw-type" class="wide">
+                        <option value="simple" selected>SIMPLU</option>
+                        <option value="physical">FIZIC</option>
+                        <option value="double">DUBLU</option>
+                        <option value="inverted">INVERSAT</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="sw-target">Țintă N</label>
+                    <div class="field__ctl">
+                      <input type="number" id="sw-target" value="200" min="4" max="600" step="1" />
+                      <span class="unit">teste</span>
+                    </div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-Lmin">L min</label>
+                    <div class="field__ctl"><input type="number" id="sw-Lmin" value="0.25" step="0.01" /><span class="unit">m</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-Lmax">L max</label>
+                    <div class="field__ctl"><input type="number" id="sw-Lmax" value="2" step="0.01" /><span class="unit">m</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-mmin">m min</label>
+                    <div class="field__ctl"><input type="number" id="sw-mmin" value="0.2" step="0.01" /><span class="unit">kg</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-mmax">m max</label>
+                    <div class="field__ctl"><input type="number" id="sw-mmax" value="5" step="0.01" /><span class="unit">kg</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-thmin">θ₀ min</label>
+                    <div class="field__ctl"><input type="number" id="sw-thmin" value="0.15" step="0.01" /><span class="unit">rad</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-thmax">θ₀ max</label>
+                    <div class="field__ctl"><input type="number" id="sw-thmax" value="0.15" step="0.01" /><span class="unit">rad</span></div>
+                  </div>
+                  <div class="field"><label class="field__label" for="sw-damp">Amortizare</label>
+                    <div class="field__ctl"><input type="number" id="sw-damp" value="0" min="0" step="0.001" /></div>
+                  </div>
+                </div>
+              </div>
+              <div class="module">
+                <div class="module__head">Execuție</div>
+                <div class="module__body stack-sm">
+                  <button type="button" class="btn btn--ink btn--lg btn--block" id="sw-run">▶ Rulează 200 de teste virtuale</button>
+                  <button type="button" class="btn btn--block" id="sw-cancel" disabled>■ Anulează</button>
+                  <button type="button" class="btn btn--block btn--signal" id="sw-push">→ Trimite tot în foaia de date</button>
+                </div>
+              </div>
+            </aside>
+
+            <div class="stage stage--scroll">
+              <div class="pad stack">
+                <div class="stat-strip">
+                  <div><div class="k">Executate</div><div class="v" id="sw-n">0</div></div>
+                  <div><div class="k">Medie T</div><div class="v" id="sw-mean">——</div></div>
+                  <div><div class="k">Deviație σ(T)</div><div class="v" id="sw-sd">——</div></div>
+                  <div><div class="k">Timp real</div><div class="v" id="sw-wall">——</div></div>
+                  <div><div class="k">g din regresie</div><div class="v accent" id="sw-g">——</div></div>
+                </div>
+                <div class="progress">
+                  <div class="progress__fill" id="sw-fill" style="width: 0%"></div>
+                  <div class="progress__text" id="sw-progress-text">Inactiv — așteaptă protocolul</div>
+                </div>
+                <div class="note note--ink" id="sw-claim">
+                  Selectează un protocol sau configurează o variație proprie, apoi rulează. Fiecare
+                  încercare este o integrare RK4 independentă, cu același estimator de perioadă
+                  folosit pentru datele camerei.
+                </div>
+                <div class="sheet-wrap" style="border: 3px solid #000; max-height: 46vh">
+                  <table class="data-sheet" id="sw-table">
+                    <thead>
+                      <tr>
+                        <th>#</th><th>Tip</th><th>L [m]</th><th>m [kg]</th><th>θ₀ [rad]</th>
+                        <th>T [s]</th><th>u(T)</th><th>T₀ [s]</th><th>Borda [s]</th><th>Cicluri</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------- 05 DATA -->
+        <section class="view" id="view-data" data-view="data">
+          <div class="split split--data">
+            <div class="data-left">
+              <div class="data-toolbar no-print">
+                <div class="seg" id="data-filter">
+                  <button type="button" data-filter="all" class="is-active">Toate</button>
+                  <button type="button" data-filter="virtual">Virtual</button>
+                  <button type="button" data-filter="camera">Cameră</button>
+                  <button type="button" data-filter="import">Import</button>
+                </div>
+                <button type="button" class="btn" id="data-add">+ Rând</button>
+                <button type="button" class="btn" id="data-paste">Lipește CSV</button>
+                <button type="button" class="btn" id="data-export">Exportă CSV</button>
+                <button type="button" class="btn btn--signal" id="data-clear">Golește</button>
+              </div>
+              <div class="sheet-wrap">
+                <table class="data-sheet" id="data-table">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox" id="data-all" checked title="Bifează tot" /></th>
+                      <th>#</th><th>Sursă</th><th>L [m]</th><th>m [kg]</th><th>θ₀ [rad]</th>
+                      <th>T [s]</th><th>u(T)</th><th>ΔT [s]</th><th>T² [s²]</th><th>Notă</th><th></th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="data-toolbar data-toolbar--bottom no-print">
+                <div class="mono upper" style="font-size: 10px; letter-spacing: 0.12em">
+                  Rânduri <b id="data-count">0</b> · Incluse <b id="data-included">0</b> ·
+                  Regresie <b id="data-fit-state">inactivă</b>
+                </div>
+                <div class="spacer"></div>
+                <button type="button" class="btn btn--ink" id="data-fit">▶ Calculează regresia</button>
+              </div>
+              <div class="paste-pop hidden" id="data-paste-pop">
+                <div class="module__head">Lipește CSV — L, m, θ0, T, uT</div>
+                <div class="module__body stack-sm">
+                  <textarea id="data-paste-area" rows="6" placeholder="0.50,1.00,0.20,1.4192,0.0008&#10;1.00,1.00,0.20,2.0064,0.0008"></textarea>
+                  <div class="btn-row">
+                    <button type="button" class="btn btn--ink" id="data-paste-ok">Importă</button>
+                    <button type="button" class="btn" id="data-paste-cancel">Anulează</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="data-right">
+              <div class="rp-chart" style="border: none; padding: 0">
+                <canvas id="data-chart" style="width: 100%; height: 100%; display: block"></canvas>
+              </div>
+              <div class="data-eq">
+                <div class="eq-block">
+                  <div class="eq-block__label">Regresie — T² = m·L + q</div>
+                  <div class="eq-block__math" id="eq-slope">PANTA (m) = —— &nbsp;|&nbsp; R² = ——</div>
+                </div>
+                <div class="eq-block eq-block--ink">
+                  <div class="eq-block__label">Gravitație experimentală</div>
+                  <div class="eq-block__math" id="eq-g">
+                    g<sub>EXP</sub> = 4π²/ m = —— <span class="accent">—</span>
+                  </div>
+                </div>
+                <div class="stat-strip">
+                  <div><div class="k">σ(slope)</div><div class="v" id="st-slope-se">——</div></div>
+                  <div><div class="k">σ(g)</div><div class="v" id="st-g-se">——</div></div>
+                  <div><div class="k">RMSE reziduu</div><div class="v" id="st-rmse">——</div></div>
+                  <div><div class="k">Interceptare</div><div class="v" id="st-int">——</div></div>
+                </div>
+                <div class="note" id="data-note">
+                  Alimentează această foaie din BATCH-200, din măsurătorile LAB-CAM, prin import
+                  CSV sau manual. Regresia folosește doar rândurile bifate.
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- --------------------------------------------------- 06 REPORT -->
+        <section class="view" id="view-report" data-view="report">
+          <div class="report-host">
+            <div class="report-toolbar no-print">
+              <button type="button" class="btn btn--ink btn--lg" id="rep-generate">⚙ Generează raportul</button>
+              <button type="button" class="btn btn--lg" id="rep-print">⎙ Printează / PDF</button>
+              <span class="mono upper muted" style="font-size: 10px; letter-spacing: 0.12em">
+                A4 · monocrom · gata de tipar
+              </span>
+              <div class="spacer"></div>
+              <span class="mono upper" style="font-size: 10px" id="rep-status">Fără raport generat</span>
+            </div>
+            <div class="report-doc" id="report-doc">
+              <div class="report-page" data-page="Page —">
+                <div class="empty-state">
+                  <b>PRESA DE<br />TIPAR</b>
+                  <span>
+                    Asamblează întregul dosar experimental: parametrii, ecuațiile de mișcare,
+                    analiza de regresie, diagnosticul factorilor și schema tehnică —
+                    sub formă de document A4 tipografic.
+                  </span>
+                  <button type="button" class="btn btn--ink btn--lg" id="rep-generate-2">⚙ Generează raportul</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =================================================== STATUS ==== -->
+      <footer class="statusbar" id="statusbar">
+        <div class="status-item">SYS <b id="st-system">SIMPLE</b></div>
+        <div class="status-item">t <b id="st-time">0.000s</b></div>
+        <div class="status-item">θ <b id="st-theta">0.000rad</b></div>
+        <div class="status-item">T₀ <b id="st-t0">2.006s</b></div>
+        <div class="status-item">ROWS <b id="st-rows">0</b></div>
+        <div class="status-item">FPS <b id="st-fps">60</b></div>
+        <div class="status-item status-item--grow" id="st-msg">GATA</div>
+      </footer>
+    </div>
+
+    <script src="js/core/util.js"></script>
+    <script src="js/core/physics/integrators.js"></script>
+    <script src="js/core/physics/systems.js"></script>
+    <script src="js/core/stats/regression.js"></script>
+    <script src="js/core/physics/detect.js"></script>
+    <script src="js/core/sim/engine.js"></script>
+    <script src="js/core/vision/tracker.js"></script>
+    <script src="js/render/drafting.js"></script>
+    <script src="js/render/plot.js"></script>
+    <script src="js/app/store.js"></script>
+    <script src="js/views/sim.js"></script>
+    <script src="js/views/compare.js"></script>
+    <script src="js/views/lab.js"></script>
+    <script src="js/views/batch.js"></script>
+    <script src="js/views/data.js"></script>
+    <script src="js/views/report.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
